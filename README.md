@@ -1,7 +1,8 @@
-## Arquitectura base Node express
+## CRUD Usuarios Node express
 
-Arquitectura básica requerida para la implementación de sitios desarrollados con node y express
+Aplicación CRUD de usuarios en Node, utilizando express, heroku y mongo.
 
+Instalación: 
 ```
 npm install
 ```

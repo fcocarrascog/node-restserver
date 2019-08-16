@@ -3,12 +3,14 @@ const bcrypt = require('bcryptjs');
 const _ = require('underscore');
 
 const Usuario = require('../modelos/usuario');
+const { verificaToken, verificaAdmin_role } = require('../middlewares/autenticacion');
 const app = express();
 
 
-
-app.get('/usuario', (req, res) => {
+app.get('/usuario', verificaToken, (req, res) => {
     //res.json('get usuario Local');
+
+
     let desde = req.query.desde || 0;
     desde = Number(desde);
 
@@ -44,7 +46,7 @@ app.get('/usuario', (req, res) => {
 
 });
 
-app.post('/usuario', (req, res) => {
+app.post('/usuario', [verificaToken, verificaAdmin_role], function(req, res) {
     let body = req.body;
 
     let usuario = new Usuario({
@@ -70,9 +72,9 @@ app.post('/usuario', (req, res) => {
 
 });
 
-app.put('/usuario/:id', (req, res) => {
+app.put('/usuario/:id', [verificaToken, verificaAdmin_role], function(req, res) {
     let id = req.params.id;
-    let body = _.pick(req.body, ['nombre', 'correo', 'img', 'role']);
+    let body = _.pick(req.body, ['nombre', 'correo', 'img', 'role', 'estado']);
 
     Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, usuarioDB) => {
         if (err) {
@@ -90,7 +92,7 @@ app.put('/usuario/:id', (req, res) => {
 
 });
 
-app.delete('/usuario/:id', (req, res) => {
+app.delete('/usuario/:id', [verificaToken, verificaAdmin_role], function(req, res) {
     let id = req.params.id;
 
     /* Modificación del estado del documento en la BD a false */
@@ -105,11 +107,20 @@ app.delete('/usuario/:id', (req, res) => {
                 err
             });
         }
-
-        res.json({
+        if (!usuarioEliminado) {
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    message: 'Usuario no encontrado'
+                }
+            });
+        }
+        return res.json({
             ok: true,
             usuarioEliminado
         });
+
+
     });
 
 
