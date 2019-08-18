@@ -31,11 +31,28 @@ let verificaAdmin_role = (req, res, next) => {
             }
         });
     }
+}
 
 
+/* VERIFICA TOKEN PARA IMAGEN*/
+let verificaTokenImg = (req, res, next) => {
+    let aut = req.query.Authorization;
+
+    jwt.verify(aut, process.env.SEED, (err, decoded) => {
+        if (err) {
+            return res.status(401).json({
+                ok: false,
+                err
+            });
+        }
+
+        req.usuario = decoded.usuario;
+        next();
+    });
 }
 
 module.exports = {
     verificaToken,
-    verificaAdmin_role
+    verificaAdmin_role,
+    verificaTokenImg
 }
